@@ -1,4 +1,4 @@
-package com.zouliga.ecomerce;
+package com.zouliga;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
