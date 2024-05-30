@@ -1,0 +1,25 @@
+spring:
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/order
+    username: zouliga
+    password: admin
+  jpa:
+    hibernate:
+      ddl-auto: create
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8070
+
+application:
+  config:
+    customer-url: http://localhost:8222/api/v1/customers
+    product-url: http://localhost:8222/api/v1/products
+    payment-url: http://localhost:8222/api/v1/payments
+#    connect directly to the service if not using api gateway. No scalability
+#    customer-url: http://localhost:8090/api/v1/customers
+#    product-url: http://localhost:8050/api/v1/products
+#    payment-url: http://localhost:8060/api/v1/payments
