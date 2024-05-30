@@ -6,6 +6,8 @@ import com.zouliga.kafka.OrderConfirmation;
 import com.zouliga.kafka.OrderProducers;
 import com.zouliga.orderLine.OrderLineRequest;
 import com.zouliga.orderLine.OrderLineService;
+import com.zouliga.payment.PaymentClient;
+import com.zouliga.payment.PaymentRequest;
 import com.zouliga.product.ProductClient;
 import com.zouliga.product.PurchaseRequest;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,6 +27,7 @@ public class OrderService {
     private final OrderMapper mapper;
     private final OrderLineService orderLineService;
     private final OrderProducers orderProducers;
+    private final PaymentClient paymentClient;
 
     public Integer createOrder(OrderRequest request) {
         // check the customer
@@ -52,6 +55,14 @@ public class OrderService {
         }
 
         // start payment process
+        var paymentRequest = new PaymentRequest(
+                request.amount(),
+                request.paymentMethod(),
+                order.getId(),
+                order.getReference(),
+                customer
+        );
+        paymentClient.requestOrderPayment(paymentRequest);
 
         // send the order confirmation --> modification microservice (kafka)
         orderProducers.sendOrderConfirmation(

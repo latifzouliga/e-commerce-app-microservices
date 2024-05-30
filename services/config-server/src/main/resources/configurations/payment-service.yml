@@ -16,3 +16,6 @@ spring:
       value-serializer: org.springframework.kafka.support.JsonSerializer
       properties:
         spring.json.type.mapping: paymentConfirmation:com.zouliga.notification.PaymentNotificationRequest
+
+server:
+  port: 8060
