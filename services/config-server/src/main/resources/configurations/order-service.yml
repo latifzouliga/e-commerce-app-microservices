@@ -10,6 +10,13 @@ spring:
       ddl-auto: create
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.JsonSerializer
+      properties:
+        spring.json.type.mapping: orderConfirmation:com.zouliga.kafka.OrderConfirmation
 
 server:
   port: 8070
