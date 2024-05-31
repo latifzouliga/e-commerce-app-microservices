@@ -2,12 +2,14 @@ package com.zouliga;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
-public class NotificatonServiceApplication {
+@EnableAsync
+public class NotificationServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(NotificatonServiceApplication.class, args);
+		SpringApplication.run(NotificationServiceApplication.class, args);
 	}
 
 }
