@@ -1,7 +1,7 @@
 package com.zouliga.product;
 
 
-import com.zouliga.excetion.BusinessException;
+import com.zouliga.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;

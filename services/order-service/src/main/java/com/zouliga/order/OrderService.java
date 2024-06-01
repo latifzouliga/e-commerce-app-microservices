@@ -1,9 +1,9 @@
 package com.zouliga.order;
 
 import com.zouliga.customer.CustomerClient;
-import com.zouliga.excetion.BusinessException;
+import com.zouliga.exception.BusinessException;
 import com.zouliga.kafka.OrderConfirmation;
-import com.zouliga.kafka.OrderProducers;
+import com.zouliga.kafka.OrderProducer;
 import com.zouliga.orderLine.OrderLineRequest;
 import com.zouliga.orderLine.OrderLineService;
 import com.zouliga.payment.PaymentClient;
@@ -11,6 +11,7 @@ import com.zouliga.payment.PaymentRequest;
 import com.zouliga.product.ProductClient;
 import com.zouliga.product.PurchaseRequest;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,9 +27,11 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper mapper;
     private final OrderLineService orderLineService;
-    private final OrderProducers orderProducers;
+    private final OrderProducer orderProducer;
     private final PaymentClient paymentClient;
 
+
+    @Transactional
     public Integer createOrder(OrderRequest request) {
         // check the customer
         var customer = customerClient.findCustomerById(request.customerId())
@@ -65,7 +68,7 @@ public class OrderService {
         paymentClient.requestOrderPayment(paymentRequest);
 
         // send the order confirmation --> modification microservice (kafka)
-        orderProducers.sendOrderConfirmation(
+        orderProducer.sendOrderConfirmation(
                 new OrderConfirmation(
                         request.reference(),
                         request.amount(),

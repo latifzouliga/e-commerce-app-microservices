@@ -1,4 +1,4 @@
-package com.zouliga.excetion;
+package com.zouliga.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;

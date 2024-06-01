@@ -1,4 +1,4 @@
-package com.zouliga.excetion;
+package com.zouliga.exception;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

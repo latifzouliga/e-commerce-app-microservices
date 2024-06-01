@@ -1,4 +1,4 @@
-package com.zouliga.excetion;
+package com.zouliga.exception;
 
 import java.util.Map;
 

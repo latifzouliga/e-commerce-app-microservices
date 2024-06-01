@@ -1,5 +1,7 @@
-spring:
+server:
+  port: 8070
 
+spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/order
@@ -7,19 +9,17 @@ spring:
     password: admin
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   kafka:
+    bootstrap-servers: localhost:9092
     producer:
-      bootstrap-servers: localhost:9092
-      key-serializer: org.apache.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.JsonSerializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.type.mapping: orderConfirmation:com.zouliga.kafka.OrderConfirmation
 
-server:
-  port: 8070
 
 application:
   config:
