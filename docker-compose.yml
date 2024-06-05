@@ -13,6 +13,11 @@ services:
     networks:
       - microservices-net
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   pgadmin:
     container_name: ms_pgadmin
@@ -47,6 +52,12 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=zouliga
       - MONGO_INITDB_ROOT_PASSWORD=zouliga
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "mongo --username zouliga --password zouliga --authenticationDatabase admin --eval 'db.adminCommand(\"ping\")'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mongo-express:
     image: mongo-express
@@ -87,13 +98,163 @@ services:
     networks:
       - microservices-net
 
-
   mail-dev:
     container_name: ms-mail-dev
     image: maildev/maildev
     ports:
       - 1080:1080
       - 1025:1025
+
+  keycloak:
+    container_name: ms_keycloak
+    image: quay.io/keycloak/keycloak:24.0.2
+    ports:
+      - 9098:8080
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    networks:
+      - microservices-net
+    command:
+      - "start-dev"
+#  ====================================
+  config-server:
+    image: com.zouliga/config-server:0.0.1-SNAPSHOT
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    networks:
+      - microservices-net
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://config-server:8888/actuator/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  discovery-service:
+    image: com.zouliga/discovery-service:0.0.1-SNAPSHOT
+    container_name: discovery-service
+    environment:
+      - PROFILE=dev
+      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx1g
+    depends_on:
+      config-server:
+        condition: service_healthy
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-net
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://discovery-service:8761/actuator/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  gateway-service:
+    image: com.zouliga/gateway-service:0.0.1-SNAPSHOT
+    container_name: gateway-service
+    environment:
+      - PROFILE=dev
+      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx1g
+    depends_on:
+      - config-server
+#      - discovery-service
+      - customer-service
+      - product-service
+      - order-service
+      - payment-service
+      - notification-service
+    ports:
+      - "8222:8222"
+    networks:
+      - microservices-net
+
+
+
+  product-service:
+    image: com.zouliga/product-service:0.0.1-SNAPSHOT
+#    image: ${GROUP_ID}/project-service:${SERVICE_VERSION:-latest}
+    container_name: project-service
+    environment:
+      - PROFILE=dev
+        - CONFIGSERVER_URI=http://configserver:8888
+        - CONFIGSERVER_PORT=8888
+        - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx1g
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/product
+        - SPRING_DATASOURCE_USERNAME=postgres
+        - SPRING_DATASOURCE_PASSWORD=admin
+        - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+    depends_on:
+      - postgresql
+#      - discovery-service
+      - config-server
+    ports:
+      - "8050:8050"
+    networks:
+      - microservices-net
+
+  customer-service:
+    image: com.zouliga/customer-service:0.0.1-SNAPSHOT
+    container_name: customer-service
+    environment:
+      - PROFILE=dev
+      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx1g
+      - SPRING_DATA_MONGODB_HOST=mongodb
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=mongodb
+      - SPRING_DATA_MONGODB_USERNAME=zouliga
+      - SPRING_DATA_MONGODB_PASSWORD=zouliga
+    depends_on:
+      - mongodb
+      - discovery-service
+      - config-server
+    ports:
+      - "8090:8090"
+    networks:
+      - microservices-net
+
+  order-service:
+    image: com.zouliga/customer-service:0.0.1-SNAPSHOT
+    container_name: order-service
+    environment:
+      - PROFILE=dev
+      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx1g
+    ports:
+      - "8070:8070"
+    networks:
+      - microservices-net
+    depends_on:
+#      - discovery-service
+      - config-server
+
+  payment-service:
+    image: com.zouliga/payment-service:0.0.1-SNAPSHOT
+    container_name: payment-service
+    environment:
+      - PROFILE=dev
+      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx1g
+    ports:
+      - "8060:8060"
+    networks:
+      - microservices-net
+    depends_on:
+#      - discovery-service
+      - config-server
+
+  notification-service:
+    image: com.zouliga/notification-service:0.0.1-SNAPSHOT
+    container_name: notification-service
+    environment:
+      - PROFILE=dev
+      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx1g
+    ports:
+      - "8040:8040"
+    networks:
+      - microservices-net
+    depends_on:
+#      - discovery-service
+      - config-server
+
 
 networks:
   microservices-net:
