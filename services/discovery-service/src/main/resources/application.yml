@@ -1,16 +1,19 @@
+
+#spring:
+#  cloud:
+#    loadbalancer:
+#      ribbon:
+#        enabled: false
 spring:
   config:
-    import: configserver:http://config-server:8888
-  application:
-    name: discovery-service
-
-eureka:
-  instance:
-    prefer-ip-address: true
-    hostname: discovery-service
-  client:
-    service-url:
-      defaultZone: "http://discovery-service:8761/eureka/"
+    use-legacy-processing: true
 
 server:
   port: 8761
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-service:8761/eureka/
+    register-with-eureka: false # don't register this service in eureka server
+    fetch-registry: false
