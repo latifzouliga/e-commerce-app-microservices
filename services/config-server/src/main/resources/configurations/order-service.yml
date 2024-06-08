@@ -21,11 +21,11 @@ spring:
         spring.json.type.mapping: orderConfirmation:com.zouliga.kafka.OrderConfirmation
 
 
-application:
-  config:
-    customer-url: http://localhost:8222/api/v1/customers
-    product-url: http://localhost:8222/api/v1/products
-    payment-url: http://localhost:8222/api/v1/payments
+#application:
+#  config:
+#    customer-url: http://localhost:8222/api/v1/customers
+#    product-url: http://localhost:8222/api/v1/products
+#    payment-url: http://localhost:8222/api/v1/payments
 #    connect directly to the service if not using api gateway. No scalability
 #    customer-url: http://localhost:8090/api/v1/customers
 #    product-url: http://localhost:8050/api/v1/products
